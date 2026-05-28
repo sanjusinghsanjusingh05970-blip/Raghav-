@@ -227,16 +227,22 @@ class GfxViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 dao.getAllProfilesFlow().collectLatest { list ->
                     _dbProfiles.value = list
-                    if (list.isEmpty()) {
-                        try {
-                            prepopulateDefaultProfiles()
-                        } catch (t: Throwable) {
-                            Log.e("GfxViewModel", "DB prepopulate defaults failed", t)
-                        }
-                    }
                 }
             } catch (t: Throwable) {
+                if (t is kotlinx.coroutines.CancellationException) throw t
                 Log.e("GfxViewModel", "DB observe profiles failed", t)
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                val count = withContext(Dispatchers.IO) { dao.getCount() }
+                if (count == 0) {
+                    prepopulateDefaultProfiles()
+                }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                Log.e("GfxViewModel", "DB prepopulate check failed", e)
             }
         }
     }
@@ -266,8 +272,10 @@ class GfxViewModel(application: Application) : AndroidViewModel(application) {
                 colorStyle = "Classic"
             )
         )
-        for (p in defaults) {
-            dao.insertProfile(p)
+        withContext(Dispatchers.IO) {
+            for (p in defaults) {
+                dao.insertProfile(p)
+            }
         }
     }
 
