@@ -1,0 +1,6 @@
+{
+  "name": "G-BOOST PRO",
+  "description": "Advanced 90 FPS GFX Tool featuring real-time telemetry overlay HUD, core hardware compatibility diagnostics, and custom network accelerators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
